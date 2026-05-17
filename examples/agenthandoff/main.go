@@ -7,8 +7,8 @@ import (
 	"os"
 
 	dotenv "github.com/joho/godotenv"
-	swarmgo "github.com/prathyushnallamothu/swarmgo"
-	"github.com/prathyushnallamothu/swarmgo/llm"
+	swarmgo "github.com/yuanxiangyx/swarmgo-plusswarmgo"
+	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
 )
 
 func transferToSpanishAgent(args map[string]interface{}, contextVariables map[string]interface{}) swarmgo.Result {

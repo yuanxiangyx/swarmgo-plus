@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	swarmgo "github.com/prathyushnallamothu/swarmgo"
-	"github.com/prathyushnallamothu/swarmgo/llm"
+	swarmgo "github.com/yuanxiangyx/swarmgo-plusswarmgo"
+	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
 )
 
 // Simple task management workflow example

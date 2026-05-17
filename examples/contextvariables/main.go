@@ -7,8 +7,8 @@ import (
 	"os"
 
 	dotenv "github.com/joho/godotenv"
-	swarmgo "github.com/prathyushnallamothu/swarmgo"
-	"github.com/prathyushnallamothu/swarmgo/llm"
+	swarmgo "github.com/yuanxiangyx/swarmgo-plusswarmgo"
+	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
 )
 
 func instructions(contextVariables map[string]interface{}) string {

@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/prathyushnallamothu/swarmgo"
-	"github.com/prathyushnallamothu/swarmgo/llm"
+	"github.com/yuanxiangyx/swarmgo-plusswarmgo"
+	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
 )
 
 // CustomStreamHandler handles streaming responses with progress updates

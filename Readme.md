@@ -40,7 +40,7 @@ SwarmGo runs (almost) entirely on the client and, much like the Chat Completions
 ## Installation
 
 ```bash
-go get github.com/prathyushnallamothu/swarmgo
+go get github.com/yuanxiangyx/swarmgo-plusswarmgo
 ```
 
 ## Quick Start
@@ -54,9 +54,9 @@ import (
 	"fmt"
 	"log"
 
-	swarmgo "github.com/prathyushnallamothu/swarmgo"
+	swarmgo "github.com/yuanxiangyx/swarmgo-plusswarmgo"
 	openai "github.com/sashabaranov/go-openai"
-	llm "github.com/prathyushnallamothu/swarmgo/llm"
+	llm "github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
 )
 
 func main() {

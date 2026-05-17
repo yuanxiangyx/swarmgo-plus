@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/prathyushnallamothu/swarmgo"
-	"github.com/prathyushnallamothu/swarmgo/llm"
+	"github.com/yuanxiangyx/swarmgo-plusswarmgo"
+	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
 )
 
 // createMemoryAgent creates an agent with memory capabilities and custom functions
