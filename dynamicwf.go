@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
+	"github.com/yuanxiangyx/swarmgo-plus/llm"
 )
 
 // DynamicWorkflowCreator helps construct workflows dynamically based on user tasks

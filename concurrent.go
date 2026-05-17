@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
+	"github.com/yuanxiangyx/swarmgo-plus/llm"
 )
 
 // ConcurrentResult represents the result from a single agent's execution

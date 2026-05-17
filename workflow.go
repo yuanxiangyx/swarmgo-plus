@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
+	"github.com/yuanxiangyx/swarmgo-plus/llm"
 )
 
 // WorkflowType defines the type of agent interaction pattern

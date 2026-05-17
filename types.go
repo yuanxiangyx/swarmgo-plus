@@ -1,7 +1,7 @@
 package swarmgo
 
 import (
-	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
+	"github.com/yuanxiangyx/swarmgo-plus/llm"
 )
 
 // Response represents the response from an agent

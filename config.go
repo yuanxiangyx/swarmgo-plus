@@ -3,7 +3,7 @@ package swarmgo
 import (
 	"net/http"
 
-	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
+	"github.com/yuanxiangyx/swarmgo-plus/llm"
 )
 
 // ClientConfig represents the configuration for an LLM client

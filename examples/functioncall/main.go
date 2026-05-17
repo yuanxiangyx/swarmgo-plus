@@ -6,8 +6,8 @@ import (
 	"os"
 
 	dotenv "github.com/joho/godotenv"
-	swarmgo "github.com/yuanxiangyx/swarmgo-plusswarmgo"
-	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
+	swarmgo "github.com/yuanxiangyx/swarmgo-plus"
+	"github.com/yuanxiangyx/swarmgo-plus/llm"
 )
 
 func getWeather(args map[string]interface{}, contextVariables map[string]interface{}) swarmgo.Result {

@@ -10,8 +10,8 @@ import (
 	"time"
 
 	dotenv "github.com/joho/godotenv"
-	swarmgo "github.com/yuanxiangyx/swarmgo-plusswarmgo"
-	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
+	swarmgo "github.com/yuanxiangyx/swarmgo-plus"
+	"github.com/yuanxiangyx/swarmgo-plus/llm"
 )
 
 // getWeather simulates getting weather data for a location

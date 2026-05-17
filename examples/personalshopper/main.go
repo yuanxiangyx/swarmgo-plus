@@ -6,8 +6,8 @@ import (
 	"os"
 
 	dotenv "github.com/joho/godotenv"
-	swarm "github.com/yuanxiangyx/swarmgo-plusswarmgo"
-	"github.com/yuanxiangyx/swarmgo-plusswarmgo/llm"
+	swarm "github.com/yuanxiangyx/swarmgo-plus"
+	"github.com/yuanxiangyx/swarmgo-plus/llm"
 )
 
 func main() {
