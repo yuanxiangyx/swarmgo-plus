@@ -55,7 +55,6 @@ import (
 	"log"
 
 	swarmgo "github.com/yuanxiangyx/swarmgo-plus"
-	openai "github.com/sashabaranov/go-openai"
 	llm "github.com/yuanxiangyx/swarmgo-plus/llm"
 )
 
@@ -68,8 +67,8 @@ func main() {
 		Model:        "gpt-3.5-turbo",
 	}
 
-	messages := []openai.ChatCompletionMessage{
-		{Role: "user", Content: "Hello!"},
+	messages := []llm.Message{
+		{Role: llm.RoleUser, Content: "Hello!"},
 	}
 
 	ctx := context.Background()
@@ -105,8 +104,8 @@ agent := &swarmgo.Agent{
 To interact with the agent, use the Run method:
 
 ```go
-messages := []openai.ChatCompletionMessage{
-	{Role: "user", Content: "Hello!"},
+messages := []llm.Message{
+	{Role: llm.RoleUser, Content: "Hello!"},
 }
 
 ctx := context.Background()
@@ -129,7 +128,8 @@ func getWeather(args map[string]interface{}, contextVariables map[string]interfa
 	location := args["location"].(string)
 	// Simulate fetching weather data
 	return swarmgo.Result{
-		Value: fmt.Sprintf(`{"temp": 67, "unit": "F", "location": "%s"}`, location),
+		Success: true,
+		Data:    fmt.Sprintf(`{"temp": 67, "unit": "F", "location": "%s"}`, location),
 	}
 }
 ```
@@ -186,8 +186,9 @@ func transferToAnotherAgent(args map[string]interface{}, contextVariables map[st
 		Model:        "gpt-3.5-turbo",
 	}
 	return swarmgo.Result{
-		Agent: anotherAgent,
-		Value: "Transferring to AnotherAgent.",
+		Success: true,
+		Agent:   anotherAgent,
+		Data:    "Transferring to AnotherAgent.",
 	}
 }
 ```
@@ -219,8 +220,8 @@ To use streaming, implement the `StreamHandler` interface:
 type StreamHandler interface {
     OnStart()
     OnToken(token string)
-    OnToolCall(toolCall openai.ToolCall)
-    OnComplete(message openai.ChatCompletionMessage)
+    OnToolCall(toolCall llm.ToolCall)
+    OnComplete(message llm.Message)
     OnError(err error)
 }
 ```
@@ -241,7 +242,7 @@ func (h *CustomStreamHandler) OnToken(token string) {
     fmt.Print(token)
 }
 
-func (h *CustomStreamHandler) OnComplete(msg openai.ChatCompletionMessage) {
+func (h *CustomStreamHandler) OnComplete(msg llm.Message) {
     fmt.Printf("\nComplete! Total tokens: %d\n", h.totalTokens)
 }
 
@@ -249,7 +250,7 @@ func (h *CustomStreamHandler) OnError(err error) {
     fmt.Printf("Error: %v\n", err)
 }
 
-func (h *CustomStreamHandler) OnToolCall(tool openai.ToolCall) {
+func (h *CustomStreamHandler) OnToolCall(tool llm.ToolCall) {
     fmt.Printf("\nUsing tool: %s\n", tool.Function.Name)
 }
 ```
@@ -287,22 +288,22 @@ SwarmGo supports running multiple agents concurrently using the `ConcurrentSwarm
 
 ```go
 // Create a concurrent swarm
-cs := swarmgo.NewConcurrentSwarm(apiKey)
+cs := swarmgo.NewConcurrentSwarm(apiKey, llm.OpenAI)
 
 // Configure multiple agents
 configs := map[string]swarmgo.AgentConfig{
     "agent1": {
         Agent: agent1,
-        Messages: []openai.ChatCompletionMessage{
-            {Role: openai.ChatMessageRoleUser, Content: "Task 1"},
+        Messages: []llm.Message{
+            {Role: llm.RoleUser, Content: "Task 1"},
         },
         MaxTurns: 1,
         ExecuteTools: true,
     },
     "agent2": {
         Agent: agent2,
-        Messages: []openai.ChatCompletionMessage{
-            {Role: openai.ChatMessageRoleUser, Content: "Task 2"},
+        Messages: []llm.Message{
+            {Role: llm.RoleUser, Content: "Task 2"},
         },
         MaxTurns: 1,
         ExecuteTools: true,
@@ -333,7 +334,7 @@ Key features of concurrent execution:
 - Support for both ordered and unordered execution
 - Error handling for individual agent failures
 
-See the `examples/concurrent_analyzer/main.go` for a complete example of concurrent code analysis using multiple specialized agents.
+See the [examples/collaborative/main.go](examples/collaborative/main.go) example for multi-agent collaboration patterns.
 
 
 ## Memory Management
@@ -342,7 +343,7 @@ SwarmGo includes a built-in memory management system that allows agents to store
 
 ```go
 // Create a new agent with memory capabilities
-agent := swarmgo.NewAgent("MyAgent", "gpt-4")
+agent := swarmgo.NewAgent("MyAgent", "gpt-4", llm.OpenAI)
 
 // Memory is automatically managed for conversations and tool calls
 // You can also explicitly store memories:
@@ -377,8 +378,8 @@ See the [memory_demo](examples/memory_demo/main.go) example for a complete demon
 
 ## LLM Interface
 
-SwarmGo provides a flexible LLM (Language Learning Model) interface that supports multiple providers:
-currently OpenAI and Gemini.
+SwarmGo provides a flexible LLM (Language Learning Model) interface that supports multiple providers,
+including OpenAI, Gemini, Claude, Ollama, and DeepSeek.
 
 To initialize a new Swarm with a specific provider:
 
