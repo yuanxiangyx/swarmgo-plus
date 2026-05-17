@@ -39,51 +39,33 @@ func (s *Swarm) StreamingResponse(
 	if handler == nil {
 		handler = &DefaultStreamHandler{}
 	}
+	if agent == nil {
+		return ErrNilAgent
+	}
 
 	if contextVariables == nil {
 		contextVariables = make(map[string]interface{})
 	}
 
+	activeAgent := agent
+
 	if debug {
-		fmt.Printf("Debug: Using model: %s\n", agent.Model)
+		fmt.Printf("Debug: Using model: %s\n", s.resolveModel(activeAgent, modelOverride))
 		fmt.Printf("Debug: Number of messages: %d\n", len(messages))
-		fmt.Printf("Debug: Number of tools: %d\n", len(agent.Functions))
+		fmt.Printf("Debug: Number of tools: %d\n", len(activeAgent.Functions))
 	}
 
-	// Prepare the initial system message with agent instructions
-	instructions := agent.Instructions
-	if agent.InstructionsFunc != nil {
-		instructions = agent.InstructionsFunc(contextVariables)
-	}
-	allMessages := append([]llm.Message{
-		{
-			Role:    llm.RoleSystem,
-			Content: instructions,
-		},
-	}, messages...)
+	allMessages := withAgentInstructions(messages, resolveInstructions(activeAgent, contextVariables), false)
 
-	// Build tool definitions
-	var tools []llm.Tool
-	for _, af := range agent.Functions {
-		def := FunctionToDefinition(af)
+	tools := buildToolsForAgent(activeAgent)
+	for _, tool := range tools {
 		if debug {
-			fmt.Printf("Debug: Adding tool: %s\n", def.Name)
+			fmt.Printf("Debug: Adding tool: %s\n", tool.Function.Name)
 		}
-		tools = append(tools, llm.Tool{
-			Type: "function",
-			Function: &llm.Function{
-				Name:        def.Name,
-				Description: def.Description,
-				Parameters:  def.Parameters,
-			},
-		})
 	}
 
 	// Prepare the streaming request
-	model := agent.Model
-	if modelOverride != "" {
-		model = modelOverride
-	}
+	model := s.resolveModel(activeAgent, modelOverride)
 
 	if debug {
 		fmt.Printf("Debug: Final model: %s\n", model)
@@ -97,7 +79,13 @@ func (s *Swarm) StreamingResponse(
 		Stream:   true,
 	}
 
-	stream, err := s.client.CreateChatCompletionStream(ctx, req)
+	streamClient, err := s.resolveClient(activeAgent)
+	if err != nil {
+		handler.OnError(err)
+		return err
+	}
+
+	stream, err := streamClient.CreateChatCompletionStream(ctx, req)
 	if err != nil {
 		if debug {
 			fmt.Printf("Debug: Stream creation error: %v\n", err)
@@ -111,7 +99,7 @@ func (s *Swarm) StreamingResponse(
 
 	var currentMessage llm.Message
 	currentMessage.Role = llm.RoleAssistant
-	currentMessage.Name = agent.Name
+	currentMessage.Name = activeAgent.Name
 
 	// Track tool calls being built
 	toolCallsInProgress := make(map[string]*llm.ToolCall)
@@ -124,7 +112,14 @@ func (s *Swarm) StreamingResponse(
 			return err
 		}
 
-		newStream, err := s.client.CreateChatCompletionStream(ctx, req)
+		var err error
+		streamClient, err = s.resolveClient(activeAgent)
+		if err != nil {
+			handler.OnError(err)
+			return err
+		}
+
+		newStream, err := streamClient.CreateChatCompletionStream(ctx, req)
 		if err != nil {
 			if debug {
 				fmt.Printf("Debug: Error creating new stream: %v\n", err)
@@ -246,7 +241,7 @@ func (s *Swarm) StreamingResponse(
 							if !processedToolCalls[toolCall.ID] {
 								// Find and execute the corresponding function
 								var fn *AgentFunction
-								for _, f := range agent.Functions {
+								for _, f := range activeAgent.Functions {
 									if f.Name == inProgress.Function.Name {
 										fn = &f
 										break
@@ -281,6 +276,10 @@ func (s *Swarm) StreamingResponse(
 									}
 								}
 
+								if result.Agent != nil {
+									activeAgent = result.Agent
+								}
+
 								// Mark as processed and clean up
 								processedToolCalls[toolCall.ID] = true
 								delete(toolCallsInProgress, toolCall.ID)
@@ -299,6 +298,13 @@ func (s *Swarm) StreamingResponse(
 								// Add messages and create new stream
 								allMessages = append(allMessages, currentMessage)
 								allMessages = append(allMessages, functionMessage)
+								allMessages = withAgentInstructions(
+									allMessages,
+									resolveInstructions(activeAgent, contextVariables),
+									result.Agent != nil,
+								)
+								req.Model = s.resolveModel(activeAgent, modelOverride)
+								req.Tools = buildToolsForAgent(activeAgent)
 								req.Messages = allMessages
 
 								if debug {
@@ -318,7 +324,7 @@ func (s *Swarm) StreamingResponse(
 								// Reset current message for new response
 								currentMessage = llm.Message{
 									Role: llm.RoleAssistant,
-									Name: agent.Name,
+									Name: activeAgent.Name,
 								}
 							}
 						} else if debug {

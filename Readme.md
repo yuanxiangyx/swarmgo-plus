@@ -391,6 +391,42 @@ client := swarmgo.NewSwarm("YOUR_API_KEY", llm.OpenAI)
 client := swarmgo.NewSwarm("YOUR_API_KEY", llm.Gemini)
 ```
 
+You can also mix providers inside the same Swarm instance. A common pattern is to keep the default provider on the root agent, then register another provider for handoff or child agents:
+
+```go
+client := swarmgo.NewSwarm(os.Getenv("OPENAI_API_KEY"), llm.OpenAI)
+
+// Register another provider on the same Swarm instance.
+if err := client.RegisterProvider(os.Getenv("DEEPSEEK_API_KEY"), llm.DeepSeek); err != nil {
+    log.Fatal(err)
+}
+
+triageAgent := &swarmgo.Agent{
+    Name:     "TriageAgent",
+    Model:    "gpt-4o",
+    Provider: llm.OpenAI,
+}
+
+deepSeekAgent := &swarmgo.Agent{
+    Name:     "DeepSeekAgent",
+    Model:    "deepseek-chat",
+    Provider: llm.DeepSeek,
+}
+```
+
+If you do not want to register a provider globally on `Swarm`, you can also inject credentials per agent:
+
+```go
+deepSeekAgent := &swarmgo.Agent{
+    Name:     "DeepSeekAgent",
+    Model:    "deepseek-chat",
+    Provider: llm.DeepSeek,
+    Config: &swarmgo.ClientConfig{
+        AuthToken: os.Getenv("DEEPSEEK_API_KEY"),
+    },
+}
+```
+
 ## Workflows
 
 Workflows in SwarmGo provide structured patterns for organizing and coordinating multiple agents. They help manage complex interactions between agents, define communication paths, and establish clear hierarchies or collaboration patterns. Think of workflows as the orchestration layer that determines how your agents work together to accomplish tasks.

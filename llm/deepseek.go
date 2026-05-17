@@ -14,24 +14,35 @@ const deepseekAPIEndpoint = "https://api.deepseek.com/chat/completions"
 
 // DeepSeekLLM implements the LLM interface for DeepSeek
 type DeepSeekLLM struct {
-	apiKey string
-	client *http.Client
+	apiKey      string
+	apiEndpoint string
+	client      *http.Client
 }
 
 // NewDeepSeekLLM creates a new DeepSeek LLM client
 func NewDeepSeekLLM(apiKey string) *DeepSeekLLM {
 	return &DeepSeekLLM{
-		apiKey: apiKey,
-		client: &http.Client{},
+		apiKey:      apiKey,
+		apiEndpoint: deepseekAPIEndpoint,
+		client:      &http.Client{},
 	}
 }
 
+// NewDeepSeekLLMWithEndpoint creates a new DeepSeek client with a custom endpoint.
+func NewDeepSeekLLMWithEndpoint(apiKey, endpoint string) *DeepSeekLLM {
+	client := NewDeepSeekLLM(apiKey)
+	if endpoint != "" {
+		client.apiEndpoint = endpoint
+	}
+	return client
+}
+
 type deepseekMessage struct {
-	Role        string     `json:"role"`
-	Content     string     `json:"content"`
-	Name        string     `json:"name,omitempty"`
-	ToolCalls   []ToolCall `json:"tool_calls,omitempty"`
-	ToolCallID  string     `json:"tool_call_id,omitempty"`
+	Role       string     `json:"role"`
+	Content    string     `json:"content"`
+	Name       string     `json:"name,omitempty"`
+	ToolCalls  []ToolCall `json:"tool_calls,omitempty"`
+	ToolCallID string     `json:"tool_call_id,omitempty"`
 }
 
 // Convert Message to deepseekMessage
@@ -56,11 +67,11 @@ func convertFromDeepSeekMessage(msg deepseekMessage) Message {
 }
 
 type deepseekRequest struct {
-	Model            string           `json:"model"`
+	Model            string            `json:"model"`
 	Messages         []deepseekMessage `json:"messages"`
-	FrequencyPenalty float32          `json:"frequency_penalty,omitempty"`
-	MaxTokens        int              `json:"max_tokens,omitempty"`
-	PresencePenalty  float32          `json:"presence_penalty,omitempty"`
+	FrequencyPenalty float32           `json:"frequency_penalty,omitempty"`
+	MaxTokens        int               `json:"max_tokens,omitempty"`
+	PresencePenalty  float32           `json:"presence_penalty,omitempty"`
 	ResponseFormat   *struct {
 		Type string `json:"type"`
 	} `json:"response_format,omitempty"`
@@ -190,7 +201,7 @@ func (l *DeepSeekLLM) CreateChatCompletion(ctx context.Context, req ChatCompleti
 		return ChatCompletionResponse{}, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", deepseekAPIEndpoint, bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", l.apiEndpoint, bytes.NewReader(body))
 	if err != nil {
 		return ChatCompletionResponse{}, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -373,7 +384,7 @@ func (l *DeepSeekLLM) CreateChatCompletionStream(ctx context.Context, req ChatCo
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", deepseekAPIEndpoint, bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", l.apiEndpoint, bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
