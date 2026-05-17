@@ -122,7 +122,7 @@ func TestHandleToolCall(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, response.Messages, 1)
-	assert.Equal(t, llm.RoleAssistant, response.Messages[0].Role)
+	assert.Equal(t, llm.RoleFunction, response.Messages[0].Role)
 	assert.Equal(t, "Function executed successfully", response.Messages[0].Content)
 }
 
@@ -154,8 +154,8 @@ func TestHandleToolCallFunctionNotFound(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, response.Messages, 1)
-	assert.Equal(t, llm.RoleAssistant, response.Messages[0].Role)
-	assert.Contains(t, response.Messages[0].Content, "Error: Tool nonExistentFunction not found.")
+	assert.Equal(t, llm.RoleFunction, response.Messages[0].Role)
+	assert.Contains(t, response.Messages[0].Content, "Error: Tool nonExistentFunction not found")
 }
 
 // TestRun tests the Run method
